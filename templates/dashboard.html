@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="text-2xl font-semibold text-green-800 mb-6">Dashboard</h1>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold text-green-800 mb-3">My Farms</h2>
+        <p class="text-3xl font-bold text-green-600">{{ farms.shape[0] if farms is not none else 0 }}</p>
+        <a href="{{ url_for('admin_add_farm')}}" class="text-green-600 hover:underline mt-2 inline-block">Manage Farms</a>
+    </div>
+    
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold text-green-800 mb-3">Predictions</h2>
+        <p class="text-3xl font-bold text-green-600">{{ predictions.shape[0] if predictions is not none else 0 }}</p>
+        <a href="{{ url_for('prediction') }}" class="text-green-600 hover:underline mt-2 inline-block">New Prediction</a>
+    </div>
+    
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold text-green-800 mb-3">Reports</h2>
+        <p class="text-3xl font-bold text-green-600">-</p>
+        <a href="{{ url_for('reports') }}" class="text-green-600 hover:underline mt-2 inline-block">View Reports</a>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold text-green-800 mb-4">Recent Predictions</h2>
+        
+        {% if predictions is not none and not predictions.empty %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead>
+                        <tr class="bg-green-100">
+                            <th class="py-2 px-3 text-left">Crop</th>
+                            <th class="py-2 px-3 text-left">Predicted Yield</th>
+                            <th class="py-2 px-3 text-left">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for _, prediction in predictions.iterrows() %}
+                            <tr class="border-b">
+                                <td class="py-2 px-3">{{ prediction.crop_type }}</td>
+                                <td class="py-2 px-3">{{ "%.2f"|format(prediction.predicted_yield) }} tons/ha</td>
+                                <td class="py-2 px-3">{{ prediction.created_at.strftime('%Y-%m-%d') if prediction.created_at is not string else prediction.created_at[:10] }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-gray-600">No predictions yet. <a href="{{ url_for('prediction') }}" class="text-green-600 hover:underline">Make your first prediction</a></p>
+        {% endif %}
+    </div>
+    
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold text-green-800 mb-4">Quick Actions</h2>
+        
+        <div class="space-y-3">
+            <a href="{{ url_for('prediction') }}" class="block w-full bg-green-100 hover:bg-green-200 text-green-800 font-semibold py-2 px-4 rounded-md text-center">
+                New Yield Prediction
+            </a>
+            
+            <a href="{{ url_for('visualization') }}" class="block w-full bg-green-100 hover:bg-green-200 text-green-800 font-semibold py-2 px-4 rounded-md text-center">
+                View Data Visualizations
+            </a>
+            
+            <a href="{{ url_for('reports') }}" class="block w-full bg-green-100 hover:bg-green-200 text-green-800 font-semibold py-2 px-4 rounded-md text-center">
+                Generate Reports
+            </a>
+            
+            {% if current_user.role == 'admin' %}
+                <a href="{{ url_for('admin_dashboard') }}" class="block w-full bg-blue-100 hover:bg-blue-200 text-blue-800 font-semibold py-2 px-4 rounded-md text-center">
+                    Admin Dashboard
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
